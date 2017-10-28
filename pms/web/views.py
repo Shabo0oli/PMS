@@ -3,7 +3,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import logout, authenticate, login
 from django.shortcuts import redirect
 from django.contrib.auth.models import User
-from .models import Student
+from .models import Student ,Todo, Done, Course
+import jdatetime
 
 
 # Create your views here.
@@ -78,5 +79,30 @@ def logout_view(request):
 
 
 def report(request):
+
+    for i in range(0, 10):
+        tagName = 'readed' + str(i)
+        if tagName in request.POST:
+            readed = request.POST[tagName]
+            tested = request.POST['test'+str(i)]
+            st = Student.objects.filter(Username=request.user)[0]
+            cr = Course.objects.filter(id=i)[0]
+            record = Done(StudentName=st, DoneDate=jdatetime.date.today(), CourseName=cr, StudyHour=readed, TestNumber=tested)
+            record.save()
+
     context = {}
+    isOk = 0
+    if Done.objects.filter(StudentName__Username=request.user, DoneDate=jdatetime.date.today()):
+        context['readonly'] = 'YES'
+        isOk = 1
+    context['ReportDay'] = jdatetime.date.today().day
+    context['ReportMonth'] = jdatetime.date.j_months_fa[ jdatetime.date.today().month-1 ]
+    context['ReportYear'] = jdatetime.date.today().year
+    list1 = Todo.objects.filter(StudentName__Username=request.user, DueDate=jdatetime.date.today())
+    list2 = Done.objects.filter(StudentName__Username=request.user, DoneDate=jdatetime.date.today())
+    if isOk == 0:
+        list2 = list1
+    
+    list = zip(list1, list2)
+    context['List'] = list
     return render(request, 'report.html', context)
