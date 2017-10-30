@@ -19,6 +19,8 @@
 
 <link rel="stylesheet" type="text/css" href="/static/admin/css/forms.css" />
 
+<link href="/static/admin/css/calendar-green.css" type="text/css" media="all" rel="stylesheet" />
+
 
 <script type="text/javascript" src="{% static 'js/118.js' %}"></script>
 <script type="text/javascript" src="/admin/jsi18n/"></script>
@@ -32,6 +34,11 @@
 <script type="text/javascript" src="/static/admin/js/vendor/xregexp/xregexp.js"></script>
 <script type="text/javascript" src="/static/admin/js/calendar.js"></script>
 <script type="text/javascript" src="/static/admin/js/admin/DateTimeShortcuts.js"></script>
+<script type="text/javascript" src="/static/admin/js/admin/jalalijscalendar/jalali.js"></script>
+<script type="text/javascript" src="/static/admin/js/admin/jalalijscalendar/calendar.js"></script>
+<script type="text/javascript" src="/static/admin/js/admin/jalalijscalendar/calendar-setup.js"></script>
+<script type="text/javascript" src="/static/admin/js/admin/jalalijscalendar/calendar-fa.js"></script>
+<script type="text/javascript" src="/static/admin/js/admin/jDateTimeShortcuts.js"></script>
 
 
     <!-- Latest compiled and minified CSS -->
@@ -89,7 +96,7 @@
 
             <ul id="menu-content" class="menu-content collapse out">
                 <li>
-                  <a href="#">
+                  <a href="{% url 'statistics' %}">
                   <i class="fa fa-dashboard fa-lg"></i> آمار و گزارشات
                   </a>
                 </li>

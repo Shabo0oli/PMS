@@ -4,6 +4,7 @@ from django.contrib.auth import logout, authenticate, login
 from django.shortcuts import redirect
 from django.contrib.auth.models import User
 from .models import Student ,Todo, Done, Course
+from django.db.models import Sum
 import jdatetime
 
 
@@ -102,7 +103,64 @@ def report(request):
     list2 = Done.objects.filter(StudentName__Username=request.user, DoneDate=jdatetime.date.today())
     if isOk == 0:
         list2 = list1
-    
+
     list = zip(list1, list2)
     context['List'] = list
     return render(request, 'report.html', context)
+
+
+def statistics(request):
+    context = {}
+    if 'StartDate' in request.POST and 'EndDate' in request.POST:
+        startDate = request.POST['StartDate'].split('-')
+        startJDate = jdatetime.date(int(startDate[0]), int(startDate[1]), int(startDate[2]))
+        endDate = request.POST['EndDate'].split('-')
+        endJDate = jdatetime.date(int(endDate[0]), int(endDate[1]), int(endDate[2]))
+        currentDate = startJDate
+
+
+
+        endJDate = endJDate.__add__(jdatetime.timedelta(days=1))
+        #context['dates'] = []
+        crList = []
+        sumList = []
+        tstList = []
+
+        courses = Course.objects.all()
+        for cr in courses:
+            list2 = Done.objects.filter(StudentName__Username=request.user, DoneDate__gte=startJDate, DoneDate__lte=endJDate, CourseName=cr)
+            sum = 0
+            test = 0
+            for rec in list2:
+                sum += rec.StudyHour
+                test += rec.TestNumber
+            crList.append(cr.Name)
+            sumList.append(sum)
+            tstList.append(test)
+        context['courses'] = zip(crList,sumList , tstList)
+        dtList = []
+        tst2List = []
+        sumList2 = []
+        totalRead = 0
+        totalTest = 0
+        while currentDate != endJDate:
+            dtList.append(currentDate)
+            list2 = Done.objects.filter(StudentName__Username=request.user, DoneDate=currentDate)
+            sum = 0
+            test = 0
+            for rec in list2:
+                sum += rec.StudyHour
+                totalRead +=rec.StudyHour
+                test += rec.TestNumber
+                totalTest +=rec.TestNumber
+
+            tst2List.append(test)
+            sumList2.append(sum)
+            currentDate = currentDate.__add__(jdatetime.timedelta(days=1))
+
+        dtList.append('مجموع')
+        sumList2.append(totalRead)
+        tst2List.append(totalTest)
+        context['dates'] = zip(dtList,sumList2,tst2List)
+
+    return render(request, 'statistics.html', context)

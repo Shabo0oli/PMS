@@ -22,14 +22,13 @@ class Student(models.Model):
 class Course(models.Model) :
     Name = models.CharField(max_length=30, blank=True)
 
-
     def __str__(self):
         return "{}".format(self.Name)
 
 
 class Todo(models.Model):
     objects = jmodels.jManager()
-    StudentName = models.OneToOneField(Student, on_delete=models.CASCADE)
+    StudentName = models.ForeignKey(Student, on_delete=models.CASCADE)
     DueDate = jmodels.jDateField()
     CourseName = models.ForeignKey(Course, on_delete=models.CASCADE)
     StudyHour = models.IntegerField(blank=True)
@@ -41,9 +40,9 @@ class Todo(models.Model):
 
 class Done(models.Model):
     objects = jmodels.jManager()
-    StudentName = models.OneToOneField(Student, on_delete=models.CASCADE)
+    StudentName = models.ForeignKey(Student, on_delete=models.CASCADE)
     DoneDate = jmodels.jDateField()
-    CourseName = models.OneToOneField(Course, on_delete=models.CASCADE)
+    CourseName = models.ForeignKey(Course, on_delete=models.CASCADE)
     StudyHour = models.IntegerField(blank=True)
     TestNumber = models.IntegerField(blank=True)
 
