@@ -5,6 +5,7 @@ from django.shortcuts import redirect
 from django.contrib.auth.models import User
 from .models import Student ,Todo, Done, Course
 from django.db.models import Sum
+from kavenegar import *
 import jdatetime
 
 
@@ -117,15 +118,10 @@ def statistics(request):
         endDate = request.POST['EndDate'].split('-')
         endJDate = jdatetime.date(int(endDate[0]), int(endDate[1]), int(endDate[2]))
         currentDate = startJDate
-
-
-
         endJDate = endJDate.__add__(jdatetime.timedelta(days=1))
-        #context['dates'] = []
         crList = []
         sumList = []
         tstList = []
-
         courses = Course.objects.all()
         for cr in courses:
             list2 = Done.objects.filter(StudentName__Username=request.user, DoneDate__gte=startJDate, DoneDate__lte=endJDate, CourseName=cr)
@@ -150,9 +146,9 @@ def statistics(request):
             test = 0
             for rec in list2:
                 sum += rec.StudyHour
-                totalRead +=rec.StudyHour
+                totalRead += rec.StudyHour
                 test += rec.TestNumber
-                totalTest +=rec.TestNumber
+                totalTest += rec.TestNumber
 
             tst2List.append(test)
             sumList2.append(sum)
@@ -161,6 +157,28 @@ def statistics(request):
         dtList.append('مجموع')
         sumList2.append(totalRead)
         tst2List.append(totalTest)
-        context['dates'] = zip(dtList,sumList2,tst2List)
+        context['dates'] = zip(dtList, sumList2, tst2List)
 
     return render(request, 'statistics.html', context)
+
+
+def sms(request):
+    context = {}
+    allstudent = Student.objects.all()
+    for st in allstudent :
+        message = ''
+        message += "گزارش فعالیت روزانه  " + st.Name + ' ' + st.Family + '\n'
+        rec = Done.objects.filter(StudentName=st, DoneDate=jdatetime.date.today())
+        if len(rec)>=1 :
+            for done in rec :
+                message+=done.CourseName.Name+" : "
+                message+=str(done.StudyHour)+ " ساعت و  "
+                message+=str(done.TestNumber)+" تست "+'\n'
+            api = KavenegarAPI('516958644E31374B684C2F6C2B58446E53565A576F413D3D')
+            params = {
+            'receptor': str(st.PhoneNumber),  # multiple mobile number, split by comma
+            'message': message,
+            }
+            response = api.sms_send(params)
+            context['response'] = response
+    return render(request, 'sms.html', context)
